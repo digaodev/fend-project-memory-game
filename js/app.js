@@ -1,7 +1,7 @@
 /*
  * Create a list that holds all of your cards
  */
-const cards = [
+const cardsList = [
   'fa-diamond',
   'fa-diamond',
   'fa-paper-plane-o',
@@ -21,7 +21,8 @@ const cards = [
 ];
 
 let cardsOpened = [];
-let cardsMatched = [];
+let moves = 0;
+let matchesLeft = 8;
 
 /*
  * Display the cards on the page
@@ -29,14 +30,14 @@ let cardsMatched = [];
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-shuffle(cards);
+shuffle(cardsList);
 
-const cardsHTML = cards
+const cardsHTML = cardsList
   .map((card, index) => {
     return `
         <li class="card"
           data-card-type="${card}"
-          id="${index}">
+          id="card-${index}">
                 <i class="fa ${card}"></i>
         </li>
     `;
@@ -44,8 +45,12 @@ const cardsHTML = cards
   .join('');
 
 const deck = document.querySelector('.deck');
-
 deck.innerHTML = cardsHTML;
+
+const cardsElem = Array.from(document.querySelectorAll('.card'));
+cardsElem.map(elem => {
+  elem.addEventListener('click', respondToTheClick);
+});
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -74,48 +79,91 @@ function shuffle(array) {
  *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
-deck.addEventListener('click', respondToTheClick);
 
 function respondToTheClick(evt) {
-  const selectedCard = evt.target;
+  showCard(evt.target);
 
-  if (evt.target !== this) {
-    toggleShowCard(evt.target);
-    toggleOpenCard(evt.target);
+  console.log('cardsOpened1 = ', cardsOpened);
 
-    if (!isCardOpened(selectedCard)) {
-      addToCardsOpened(evt.target);
-    } else {
-      removeFromCardsOpened(evt.target);
-    }
-  }
+  const card = {
+    id: evt.target.id,
+    cardName: evt.target.dataset.cardType
+  };
 
-  console.log(cardsOpened);
-}
-
-function isCardOpened(card) {
   if (cardsOpened.length > 0) {
-    return !!cardsOpened.find(selectedCard => card.id === selectedCard.id);
+    addToCardsOpened(card);
+    if (findMatches(card) === 2) {
+      //found match
+      setCardsMatched();
+    } else {
+      // did not found match
+      resetCardsUnmatched();
+    }
+    addToMoves();
+  } else {
+    // first card opened
+    addToCardsOpened(card);
+  }
+  console.log('cardsOpened2 = ', cardsOpened);
+}
+
+function addToCardsOpened(newCard) {
+  cardsOpened = [...cardsOpened, newCard];
+}
+
+function removeFromCardsOpened(newCard) {
+  cardsOpened = [...cardsOpened, newCard];
+}
+
+function findMatches(card) {
+  if (cardsOpened.length > 0) {
+    return cardsOpened.filter(
+      selectedCard => card.cardName === selectedCard.cardName
+    ).length;
   }
 }
 
-function addToCardsOpened(card) {
-  if (card.id) {
-    cardsOpened = [
-      ...cardsOpened,
-      { id: card.id, card: card.dataset.cardType }
-    ];
+function showCard(elem) {
+  if (!elem.classList.contains('show')) {
+    elem.classList.add('show', 'open');
   }
 }
 
-function removeFromCardsOpened(card) {
-  cardsOpened = cardsOpened.filter(filteredCard => card.id !== filteredCard.id);
+function addToMoves() {
+  const movesElem = document.querySelector('.moves');
+  moves += 1;
+  movesElem.innerHTML = moves;
 }
 
-function toggleShowCard(elem) {
-  elem.classList.toggle('show');
+function setCardsMatched() {
+  // const elemClass = `.${card.cardName}`;
+  // console.log('elemClass', elemClass);
+  // let elems = Array.from(document.querySelectorAll(elemClass));
+
+  // elems.map(elem => {
+  //   elem.classList.remove('open');
+  //   elem.classList.add('match');
+  // });
+  cardsOpened.map(card => {
+    const elemID = `#${card.id}`;
+    document.querySelector(elemID).classList.remove('open');
+    document.querySelector(elemID).classList.add('match');
+  });
+
+  cardsOpened = [];
 }
 
-function toggleOpenCard(elem) {
-  elem.classList.toggle('open');
+function resetCardsUnmatched() {
+  document.querySelector('.deck').classList.add('disabled');
+
+  setTimeout(() => {
+    cardsOpened.map(card => {
+      const elemID = `#${card.id}`;
+      document.querySelector(elemID).classList.remove('show', 'open');
+    });
+
+    cardsOpened = [];
+
+    document.querySelector('.deck').classList.remove('disabled');
+  }, 1000);
 }
