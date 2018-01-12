@@ -20,9 +20,11 @@ const cardsList = [
   'fa-bomb'
 ];
 
-let cardsOpened = [];
-let moves = 0;
-let matchesLeft = 8;
+let cardsOpened;
+let moves;
+let seconds;
+let matchesLeft;
+let timer;
 
 /*
  * Display the cards on the page
@@ -30,27 +32,48 @@ let matchesLeft = 8;
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-shuffle(cardsList);
+// init();
 
-const cardsHTML = cardsList
-  .map((card, index) => {
-    return `
+function init() {
+  cardsOpened = [];
+  moves = 0;
+  seconds = 0;
+  matchesLeft = 8;
+
+  document.querySelector('.deck').classList.remove('disabled', 'pre-game');
+
+  document.querySelector('.btn-start').classList.add('hide');
+
+  stopTimer();
+  startTimer();
+
+  shuffle(cardsList);
+
+  const cardsHTML = cardsList
+    .map((card, index) => {
+      return `
         <li class="card"
           data-card-type="${card}"
           id="card-${index}">
                 <i class="fa ${card}"></i>
         </li>
     `;
-  })
-  .join('');
+    })
+    .join('');
 
-const deck = document.querySelector('.deck');
-deck.innerHTML = cardsHTML;
+  const deck = document.querySelector('.deck');
+  deck.innerHTML = cardsHTML;
 
-const cardsElem = Array.from(document.querySelectorAll('.card'));
-cardsElem.map(elem => {
-  elem.addEventListener('click', respondToTheClick);
-});
+  const cardsElem = Array.from(document.querySelectorAll('.card'));
+  cardsElem.map(elem => {
+    elem.addEventListener('click', respondToTheClick);
+  });
+
+  const restartElem = document.querySelector('.restart');
+  restartElem.addEventListener('click', init);
+
+  updateMoves();
+}
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -83,8 +106,6 @@ function shuffle(array) {
 function respondToTheClick(evt) {
   showCard(evt.target);
 
-  console.log('cardsOpened1 = ', cardsOpened);
-
   const card = {
     id: evt.target.id,
     cardName: evt.target.dataset.cardType
@@ -99,15 +120,29 @@ function respondToTheClick(evt) {
       // did not found match
       resetCardsUnmatched();
     }
-    addToMoves();
+    moves += 1;
+
+    updateMoves();
   } else {
     // first card opened
     addToCardsOpened(card);
   }
-  console.log('cardsOpened2 = ', cardsOpened);
+
+  if (moves === 10) {
+    updateRating();
+  } else if (moves === 16) {
+    updateRating();
+  } else if (moves === 20) {
+    updateRating();
+  }
+
+  if (matchesLeft === 0) {
+    finishGame();
+  }
 }
 
 function addToCardsOpened(newCard) {
+  document.querySelector(`#${newCard.id}`).classList.add('disabled');
   cardsOpened = [...cardsOpened, newCard];
 }
 
@@ -129,21 +164,17 @@ function showCard(elem) {
   }
 }
 
-function addToMoves() {
+function updateMoves() {
   const movesElem = document.querySelector('.moves');
-  moves += 1;
   movesElem.innerHTML = moves;
 }
 
-function setCardsMatched() {
-  // const elemClass = `.${card.cardName}`;
-  // console.log('elemClass', elemClass);
-  // let elems = Array.from(document.querySelectorAll(elemClass));
+function updateRating() {
+  const movesElem = document.querySelectorAll('.fa-star');
+  movesElem[0].classList.add('hide');
+}
 
-  // elems.map(elem => {
-  //   elem.classList.remove('open');
-  //   elem.classList.add('match');
-  // });
+function setCardsMatched() {
   cardsOpened.map(card => {
     const elemID = `#${card.id}`;
     document.querySelector(elemID).classList.remove('open');
@@ -151,6 +182,7 @@ function setCardsMatched() {
   });
 
   cardsOpened = [];
+  matchesLeft -= 1;
 }
 
 function resetCardsUnmatched() {
@@ -159,11 +191,41 @@ function resetCardsUnmatched() {
   setTimeout(() => {
     cardsOpened.map(card => {
       const elemID = `#${card.id}`;
-      document.querySelector(elemID).classList.remove('show', 'open');
+      document
+        .querySelector(elemID)
+        .classList.remove('show', 'open', 'disabled');
     });
 
     cardsOpened = [];
 
     document.querySelector('.deck').classList.remove('disabled');
   }, 1000);
+}
+
+function finishGame() {
+  setTimeout(() => {
+    alert('You win! Your moves: ' + moves);
+  }, 500);
+
+  stopTimer();
+
+  cardsOpened = [];
+  moves = 0;
+  seconds = 0;
+  matchesLeft = 8;
+
+  document.querySelector('.deck').classList.add('disabled', 'pre-game');
+}
+
+function startTimer() {
+  timer = setInterval(addTimer, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timer);
+}
+
+function addTimer() {
+  const timerElem = document.querySelector('.timer');
+  timerElem.innerHTML = ++seconds;
 }
