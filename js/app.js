@@ -23,6 +23,7 @@ const cardsList = [
 let cardsOpened;
 let moves;
 let seconds;
+let ratings;
 let matchesLeft;
 let timer;
 
@@ -38,17 +39,23 @@ function init() {
   cardsOpened = [];
   moves = 0;
   seconds = 0;
+  ratings = 3;
   matchesLeft = 8;
 
+  // enable the board at the start of the game
   document.querySelector('.deck').classList.remove('disabled', 'pre-game');
 
-  document.querySelector('.btn-start').classList.add('hide');
+  document.querySelector('#btnStartGame').classList.add('hide');
 
+  document.querySelector('.modal').style.display = 'none';
+
+  // reset the timer
   stopTimer();
   startTimer();
 
   shuffle(cardsList);
 
+  // create the html snippet to insert in the DOM
   const cardsHTML = cardsList
     .map((card, index) => {
       return `
@@ -61,16 +68,15 @@ function init() {
     })
     .join('');
 
-  const deck = document.querySelector('.deck');
-  deck.innerHTML = cardsHTML;
+  const deck = (document.querySelector('.deck').innerHTML = cardsHTML);
 
+  // add a click handler to every card on the board
   const cardsElem = Array.from(document.querySelectorAll('.card'));
   cardsElem.map(elem => {
     elem.addEventListener('click', respondToTheClick);
   });
 
-  const restartElem = document.querySelector('.restart');
-  restartElem.addEventListener('click', init);
+  document.querySelector('.restart').addEventListener('click', init);
 
   updateMoves();
 }
@@ -103,6 +109,7 @@ function shuffle(array) {
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
 
+ // handler that controls the logic of the game at each card click
 function respondToTheClick(evt) {
   showCard(evt.target);
 
@@ -114,20 +121,21 @@ function respondToTheClick(evt) {
   if (cardsOpened.length > 0) {
     addToCardsOpened(card);
     if (findMatches(card) === 2) {
-      //found match
+      //found a card match
       setCardsMatched();
     } else {
-      // did not found match
+      // did not found a card match
       resetCardsUnmatched();
     }
     moves += 1;
 
     updateMoves();
   } else {
-    // first card opened
+    // first card is opened, no need to check for match
     addToCardsOpened(card);
   }
 
+  // control the ratings based on the number of player moves
   if (moves === 10) {
     updateRating();
   } else if (moves === 16) {
@@ -136,7 +144,8 @@ function respondToTheClick(evt) {
     updateRating();
   }
 
-  if (matchesLeft === 0) {
+  // control the end game
+  if (matchesLeft === 8) {
     finishGame();
   }
 }
@@ -165,13 +174,13 @@ function showCard(elem) {
 }
 
 function updateMoves() {
-  const movesElem = document.querySelector('.moves');
-  movesElem.innerHTML = moves;
+  document.querySelector('.moves').innerHTML = moves;
 }
 
 function updateRating() {
   const movesElem = document.querySelectorAll('.fa-star');
   movesElem[0].classList.add('hide');
+  ratings -= 1;
 }
 
 function setCardsMatched() {
@@ -202,21 +211,6 @@ function resetCardsUnmatched() {
   }, 1000);
 }
 
-function finishGame() {
-  setTimeout(() => {
-    alert('You win! Your moves: ' + moves);
-  }, 500);
-
-  stopTimer();
-
-  cardsOpened = [];
-  moves = 0;
-  seconds = 0;
-  matchesLeft = 8;
-
-  document.querySelector('.deck').classList.add('disabled', 'pre-game');
-}
-
 function startTimer() {
   timer = setInterval(addTimer, 1000);
 }
@@ -226,6 +220,38 @@ function stopTimer() {
 }
 
 function addTimer() {
-  const timerElem = document.querySelector('.timer');
-  timerElem.innerHTML = ++seconds;
+  document.querySelector('.timer').innerHTML = ++seconds;
+}
+
+// construct and show the summary modal when game ends
+function finishGame() {
+  setTimeout(() => {
+    let summaryElem = document.createDocumentFragment();
+
+    let movesElem = document.createElement('p');
+    movesElem.textContent = `You did ${moves} moves to finish the game.`;
+    summaryElem.appendChild(movesElem);
+
+    let timerElem = document.createElement('p');
+    timerElem.textContent = `You took ${seconds} seconds to finish the game.`;
+    summaryElem.appendChild(timerElem);
+
+    let ratingsElem = document.createElement('p');
+    ratingsElem.textContent = `Your rating is ${ratings} stars.`;
+    summaryElem.appendChild(ratingsElem);
+
+    let modalBodyElem = document.querySelector('.modal-body');
+    modalBodyElem.textContent = '';
+    modalBodyElem.appendChild(summaryElem);
+
+    document.querySelector('.modal').style.display = 'block';
+  }, 500);
+
+  stopTimer();
+
+  document.querySelector('.deck').classList.add('disabled', 'pre-game');
+}
+
+function closeModal() {
+  document.querySelector('.modal').style.display = 'none';
 }

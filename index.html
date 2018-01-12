@@ -11,6 +11,21 @@
 </head>
 
 <body>
+    <div id="finishModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Congratulations!</h2>
+            </div>
+            <div class="modal-body">
+                <p>You have found all the matching cards!</p>
+            </div>
+            <div class="modal-footer">
+                <p>Do you want to play again?</p>
+                <button class="btn btn-start" onclick="init()">Yes</button>
+                <button class="btn btn-end" onclick="closeModal()">No</button>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <header>
@@ -18,7 +33,7 @@
         </header>
 
         <section class="score-panel">
-            <button class="btn-start" onclick="init()">Start Game</button>
+            <button id="btnStartGame" class="btn btn-start" onclick="init()">Start Game</button>
             <ul class="stars">
                 <li>
                     <i class="fa fa-star"></i>
