@@ -109,7 +109,7 @@ function shuffle(array) {
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
 
- // handler that controls the logic of the game at each card click
+// handler that controls the logic of the game at each card click
 function respondToTheClick(evt) {
   showCard(evt.target);
 
@@ -130,23 +130,29 @@ function respondToTheClick(evt) {
     moves += 1;
 
     updateMoves();
+
+    // control the ratings based on the number of player moves
+    if (moves === 10) {
+      ratings -= 1;
+      updateRating();
+      console.log('ratings: ', ratings);
+    } else if (moves === 16) {
+      ratings -= 1;
+      updateRating();
+      console.log('ratings: ', ratings);
+    } else if (moves === 20) {
+      ratings -= 1;
+      updateRating();
+      console.log('ratings: ', ratings);
+    }
+
+    // control the end game
+    if (matchesLeft === 0) {
+      finishGame();
+    }
   } else {
     // first card is opened, no need to check for match
     addToCardsOpened(card);
-  }
-
-  // control the ratings based on the number of player moves
-  if (moves === 10) {
-    updateRating();
-  } else if (moves === 16) {
-    updateRating();
-  } else if (moves === 20) {
-    updateRating();
-  }
-
-  // control the end game
-  if (matchesLeft === 8) {
-    finishGame();
   }
 }
 
@@ -178,9 +184,7 @@ function updateMoves() {
 }
 
 function updateRating() {
-  const movesElem = document.querySelectorAll('.fa-star');
-  movesElem[0].classList.add('hide');
-  ratings -= 1;
+  document.querySelectorAll('.fa-star')[0].remove();
 }
 
 function setCardsMatched() {
@@ -237,7 +241,11 @@ function finishGame() {
     summaryElem.appendChild(timerElem);
 
     let ratingsElem = document.createElement('p');
-    ratingsElem.textContent = `Your rating is ${ratings} stars.`;
+    if (ratings > 1) {
+      ratingsElem.textContent = `Your rating is ${ratings} stars.`;
+    } else {
+      ratingsElem.textContent = `Your rating is ${ratings} star.`;
+    }
     summaryElem.appendChild(ratingsElem);
 
     let modalBodyElem = document.querySelector('.modal-body');
