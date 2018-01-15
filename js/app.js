@@ -49,6 +49,11 @@ function init() {
 
   document.querySelector('.modal').style.display = 'none';
 
+  // reset the ratings
+  document.querySelectorAll('.fa-star').forEach(function(elem) {
+    elem.classList.remove('hide');
+  });
+
   // reset the timer
   stopTimer();
   startTimer();
@@ -138,9 +143,6 @@ function respondToTheClick(evt) {
     } else if (moves === 16) {
       ratings -= 1;
       updateRating();
-    } else if (moves === 20) {
-      ratings -= 1;
-      updateRating();
     }
 
     // control the end game
@@ -181,7 +183,13 @@ function updateMoves() {
 }
 
 function updateRating() {
-  document.querySelectorAll('.fa-star')[0].remove();
+  let ratingsList = document.querySelectorAll('.fa-star.hide');
+
+  if (ratingsList.length === 0) {
+    document.querySelector('.fa-star').classList.add('hide');
+  } else {
+    document.querySelector('.fa-star:not(.hide)').classList.add('hide');
+  }
 }
 
 function setCardsMatched() {
