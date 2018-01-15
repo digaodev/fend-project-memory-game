@@ -15,7 +15,7 @@ To get started, open `js/app.js` and start building out the app's functionality
 
 The games has no dependencies. If you want to run it locally, just clone or download it and open the index.html file in your browser.
 
-To see the game in action, access it [HERE](http://githubpages.com);
+To see the game in action, access it [HERE](https://digaodev.github.io/fend-project-memory-game/);
 
 ## How The Game Works
 
