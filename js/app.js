@@ -135,15 +135,12 @@ function respondToTheClick(evt) {
     if (moves === 10) {
       ratings -= 1;
       updateRating();
-      console.log('ratings: ', ratings);
     } else if (moves === 16) {
       ratings -= 1;
       updateRating();
-      console.log('ratings: ', ratings);
     } else if (moves === 20) {
       ratings -= 1;
       updateRating();
-      console.log('ratings: ', ratings);
     }
 
     // control the end game
